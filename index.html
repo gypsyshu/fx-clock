@@ -1,53 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>USDJPY スキャル寄り時計＋指標</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow-x: hidden;
-    }
-    .tradingview-widget-container {
-      width: 100vw;
-      height: 50vh;
-      box-sizing: border-box;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FX自動売買コントロールパネル</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div id="date">読み込み中...</div>
-  <div id="clock">--:--:--</div>
-  <hr>
-  <div id="news">指標を読み込み中...</div>
-  <hr>
-  <!-- TradingView Widget BEGIN -->
-  <div class="tradingview-widget-container">
-    <div id="tradingview_7b5f7" style="height:100%;"></div>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script type="text/javascript">
-      new TradingView.widget({
-        "width": "100%",
-        "height": "100%",
-        "symbol": "FX:USDJPY",
-        "interval": "5",
-        "timezone": "Asia/Tokyo",
-        "theme": "dark",
-        "style": "1",
-        "locale": "ja",
-        "toolbar_bg": "#000000",
-        "enable_publishing": false,
-        "allow_symbol_change": false,
-        "container_id": "tradingview_7b5f7"
-      });
-    </script>
+  <div class="container">
+    <h1>FX自動売買コントロールパネル</h1>
+
+    <!-- ─────────── 自動売買スイッチ ─────────── -->
+    <div class="section">
+      <h2>自動売買システム</h2>
+      <label>
+        <input type="checkbox" id="toggleSystem" />
+        <span id="systemStatus">OFF</span>
+      </label>
+      <p>現在：<span id="currentStatus" class="off">停止中</span></p>
+      <p>最終エントリー：<span id="lastEntryTime">―</span></p>
+    </div>
+
+    <!-- ─────────── 収支サマリー ─────────── -->
+    <div class="section stats-bar">
+      <h2>収支サマリー</h2>
+      <div class="stats-grid">
+        <div><span class="label">取引数</span><span id="statTrades">0</span></div>
+        <div><span class="label">勝率</span><span id="statWinRate">0%</span></div>
+        <div><span class="label">合計pips</span><span id="statPips">0</span></div>
+        <div><span class="label">平均RR</span><span id="statRR">0.00</span></div>
+      </div>
+    </div>
+
+    <!-- ─────────── 収支テーブル ─────────── -->
+    <div class="section">
+      <h2>収支成績</h2>
+      <table>
+        <thead>
+          <tr><th>日付</th><th>勝敗</th><th>損益(pips)</th><th>RR</th></tr>
+        </thead>
+        <tbody id="logTable"></tbody>
+      </table>
+    </div>
+
+    <!-- ─────────── エントリー通知ログ ─────────── -->
+    <div class="section">
+      <h2>エントリー通知ログ</h2>
+      <ul id="entryLog" class="log-list">
+        <li>まだエントリーはありません</li>
+      </ul>
+    </div>
+
+    <!-- ─────────── システム管理パネル ─────────── -->
+    <div class="section">
+      <h2>システム管理パネル</h2>
+
+      <h3>地合い評価（iris適応度）</h3>
+      <ul id="marketEval" class="eval-list"></ul>
+      <button id="btnEvalMarket">再評価</button>
+
+      <h3>構造整合性チェック (M1 × M15)</h3>
+      <p id="structureStatus">未チェック</p>
+      <button id="btnCheckStructure">チェック</button>
+
+      <h3>TP/SL & RR計算</h3>
+      <div class="rr-grid">
+        <label>エントリー価格 <input type="number" id="inpEntry" step="0.0001" /></label>
+        <label>TP価格 <input type="number" id="inpTP" step="0.0001" /></label>
+        <label>SL価格 <input type="number" id="inpSL" step="0.0001" /></label>
+        <div class="rr-result">RR: <span id="rrValue">―</span></div>
+      </div>
+
+      <h3>最終判断</h3>
+      <p id="finalDecision">―</p>
+    </div>
   </div>
-  <!-- TradingView Widget END -->
 
   <script src="script.js"></script>
 </body>

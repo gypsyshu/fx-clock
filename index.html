@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FX 自動売買パネル</title>
 
-  <!-- PWA対応 -->
+  <!-- PWA関連 -->
   <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -14,14 +14,16 @@
   <meta name="theme-color" content="#000000" />
 
   <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(function(OneSignal) {
       OneSignal.init({
-        appId: "478eae6e-2a31-446e-8b47-b596293afa68",
-        safari_web_id: "web.onesignal.REPLACE_THIS_ID", // ←正しいsafari_web_idを入力
-        notifyButton: { enable: true },
+        appId: "478eae6e-2a31-446e-8b47-b596293afa68", // ← あなたの OneSignal App ID
+        safari_web_id: "web.onesignal.YOUR_SAFARI_WEB_ID_HERE", // ← Safari Web ID をここに入れる
+        notifyButton: {
+          enable: true
+        },
         allowLocalhostAsSecureOrigin: true
       });
 
@@ -47,7 +49,9 @@
       border-radius: 8px;
       box-shadow: 0 0 10px #0f0;
     }
-    .danger { color: red; }
+    .danger {
+      color: red;
+    }
   </style>
 </head>
 <body>

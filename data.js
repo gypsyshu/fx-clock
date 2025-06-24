@@ -12,3 +12,4 @@ const tradeLog = [
     "rr": 0.5
   }
 ];
+const balance = 231000;

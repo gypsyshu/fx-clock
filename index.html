@@ -2,134 +2,72 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FX 自動売買パネル</title>
-  <link rel="stylesheet" href="style.css" />
 
-  <!-- OneSignal Push 初期化 -->
+  <!-- PWA対応 -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="FXパネル" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- OneSignal SDK -->
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
   <script>
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function () {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(function(OneSignal) {
       OneSignal.init({
         appId: "478eae6e-2a31-446e-8b47-b596293afa68",
-        notifyButton: { enable: true }
+        safari_web_id: "web.onesignal.REPLACE_THIS_ID", // ←正しいsafari_web_idを入力
+        notifyButton: { enable: true },
+        allowLocalhostAsSecureOrigin: true
       });
-      OneSignal.showSlidedownPrompt(); // 通知許可プロンプト
+
+      OneSignal.showSlidedownPrompt().catch(e => {
+        console.warn("通知プロンプトエラー:", e);
+      });
     });
   </script>
+
+  <style>
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .panel {
+      border: 2px solid #0f0;
+      margin: 1em;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #0f0;
+    }
+    .danger { color: red; }
+  </style>
 </head>
 <body>
   <h1>FX 自動売買パネル</h1>
 
-  <section id="system">
-    <label>
-      <input type="checkbox" id="toggleSystem" />
-      <span id="systemStatus">停止中</span>
-    </label>
-    <p>最終エントリー: <span id="lastEntry">--</span></p>
-  </section>
+  <div class="panel">
+    <p><span class="danger">● 停止中</span></p>
+    <p>最終エントリー: 2025-06-24 S 22:10</p>
+  </div>
 
-  <section id="summary">
-    <p>勝率: <span id="statWinRate">--%</span></p>
-    <p>合計pips: <span id="statPips">--</span></p>
-    <p>平均RR: <span id="statRR">--</span></p>
-  </section>
+  <div class="panel">
+    <p>勝率: 50.0%</p>
+    <p>合計pips: 15.0</p>
+    <p>平均RR: 1.25</p>
+  </div>
 
-  <section id="status">
-    <p>通知: <span id="notifyStatus">未確認</span></p>
-    <p>CSV: <span id="csvStatus">未確認</span></p>
-  </section>
-
-  <!-- データ埋め込み -->
-  <script>
-    const tradeLog = [
-      { date: "2025-06-24", result: 1, pips: 30.0, rr: 2.0, time: "21:50" },
-      { date: "2025-06-24", result: 0, pips: -15.0, rr: 0.5, time: "22:10" }
-    ];
-    const balance = 231000;
-  </script>
-
-  <!-- メインロジック -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggle = document.getElementById("toggleSystem");
-      const status = document.getElementById("systemStatus");
-      const notify = document.getElementById("notifyStatus");
-      const csv = document.getElementById("csvStatus");
-      const lastEntry = document.getElementById("lastEntry");
-
-      function isWithinTradingHours() {
-        const now = new Date();
-        const nowMinutes = now.getHours() * 60 + now.getMinutes();
-        const start = 9 * 60;
-        const end = 23 * 60 + 30;
-        return nowMinutes >= start && nowMinutes <= end;
-      }
-
-      const isUserActive = localStorage.getItem("systemActive") === "true";
-      const isActive = isUserActive && isWithinTradingHours();
-      toggle.checked = isUserActive;
-      updateStatus(isActive);
-
-      toggle.addEventListener("change", () => {
-        const active = toggle.checked;
-        localStorage.setItem("systemActive", active);
-        updateStatus(active && isWithinTradingHours());
-      });
-
-      function updateStatus(active) {
-        if (!isWithinTradingHours()) {
-          status.textContent = "停止中（時間外）";
-          status.className = "off";
-        } else {
-          status.textContent = active ? "稼働中" : "停止中";
-          status.className = active ? "on" : "off";
-        }
-      }
-
-      function sendPushNotification(message) {
-        if (window.OneSignal) {
-          OneSignal.Notifications.isPushNotificationsEnabled().then(function (enabled) {
-            if (enabled) {
-              OneSignal.sendSelfNotification(
-                "エントリー通知",
-                message,
-                window.location.href,
-                null
-              );
-            } else {
-              console.log("通知が許可されていません");
-            }
-          });
-        }
-      }
-
-      try {
-        if (!Array.isArray(tradeLog)) throw new Error();
-        csv.textContent = "OK";
-
-        let wins = 0, total = 0, totalPips = 0, totalRR = 0;
-        tradeLog.forEach(row => {
-          total++;
-          totalPips += row.pips;
-          totalRR += row.rr;
-          if (row.result === 1) wins++;
-        });
-
-        document.getElementById("statWinRate").textContent = `${((wins / total) * 100).toFixed(1)}%`;
-        document.getElementById("statPips").textContent = totalPips.toFixed(1);
-        document.getElementById("statRR").textContent = (totalRR / total).toFixed(2);
-
-        const last = tradeLog[tradeLog.length - 1];
-        const message = `エントリー発生：${last.date} ${last.result === 1 ? 'L' : 'S'} ${last.time || '--:--'}`;
-        lastEntry.textContent = message;
-        sendPushNotification(message);
-      } catch {
-        csv.textContent = "エラー";
-      }
-
-      notify.textContent = "有効";
-    });
-  </script>
+  <div class="panel">
+    <p>通知: 有効</p>
+    <p>CSV: エラー</p>
+  </div>
 </body>
 </html>
+

@@ -19,12 +19,12 @@
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(function(OneSignal) {
       OneSignal.init({
-        appId: "YOUR_ONESIGNAL_APP_ID", /478eae6e-2a31-446e-8b47-b596293afa68/ 
-        safari_web_id: "web.onesignal.YOUR_SAFARI_WEB_ID", // ← Safari用Web IDに置き換え
+        appId: "478eae6e-2a31-446e-8b47-b596293afa68", // ← ここに正しいApp IDを記載
+        safari_web_id: "web.onesignal.YOUR_SAFARI_WEB_ID", // ← Safari用Web IDに置き換えてください
         notifyButton: {
           enable: true
         },
-        allowLocalhostAsSecureOrigin: true // localhost開発用（不要なら削除OK）
+        allowLocalhostAsSecureOrigin: true
       });
 
       OneSignal.showSlidedownPrompt().catch(e => {

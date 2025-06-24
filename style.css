@@ -1,60 +1,39 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #111;
+  background: #0d0d0d;
   color: #39ff14;
+  font-family: 'Segoe UI', sans-serif;
   padding: 20px;
 }
 
 h1 {
+  text-align: center;
   color: #39ff14;
   text-shadow: 0 0 10px #39ff14;
 }
 
 section {
+  margin-bottom: 20px;
+  padding: 15px;
   background: #1a1a1a;
   border: 1px solid #39ff14;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 0 10px #39ff14;
 }
 
 label {
   font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #systemStatus.on {
   color: #00ff00;
-  text-shadow: 0 0 5px #00ff00;
   font-weight: bold;
 }
 
 #systemStatus.off {
   color: #ff4040;
-  text-shadow: 0 0 5px #ff4040;
   font-weight: bold;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #39ff14;
-  padding: 8px;
-  text-align: center;
-  color: #fff;
-}
-
-th {
-  background-color: #222;
-}
-
-#balance {
-  font-size: 1.2em;
-  font-weight: bold;
-  text-shadow: 0 0 5px #39ff14;
 }
 

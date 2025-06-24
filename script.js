@@ -84,3 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
   notify.textContent = "有効";
 });
 
+// OneSignal 初期化コード
+window.OneSignal = window.OneSignal || [];
+OneSignal.push(function() {
+  OneSignal.init({
+    appId: "478eae6e-2a31-446e-8b47-b596293afa68",
+    notifyButton: { enable: true },
+    allowLocalhostAsSecureOrigin: true
+  });
+
+  // 初回通知（テスト）
+  sendPushNotification("ページを開きました（OneSignal準備完了）");
+});

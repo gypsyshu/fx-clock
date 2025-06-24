@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>FX自動売買コントロールパネル</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>FX自動売買コントロールパネル</h1>
+
+  <section>
+    <h2>収支サマリー</h2>
+    <p>取引数: <span id="statTrades">0</span></p>
+    <p>勝率: <span id="statWinRate">0%</span></p>
+    <p>合計pips: <span id="statPips">0</span></p>
+    <p>平均RR: <span id="statRR">0.00</span></p>
+  </section>
+
+  <section>
+    <h2>収支成績</h2>
+    <table>
+      <thead>
+        <tr><th>日付</th><th>勝敗</th><th>損益(pips)</th><th>RR</th></tr>
+      </thead>
+      <tbody id="logTable"></tbody>
+    </table>
+  </section>
+
+  <!-- script.js より先に data.js を読み込む -->
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,201 +1,73 @@
-/* ─────────────────────────────────────────
-   自動売買 ON/OFF スイッチ
-──────────────────────────────────────── */
-const toggle        = document.getElementById("toggleSystem");
-const statusText    = document.getElementById("systemStatus");
-const currentStatus = document.getElementById("currentStatus");
-const lastEntryTime = document.getElementById("lastEntryTime");
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("toggleSystem");
+  const status = document.getElementById("systemStatus");
+  const notify = document.getElementById("notifyStatus");
+  const csv = document.getElementById("csvStatus");
+  const lastEntry = document.getElementById("lastEntry");
 
-let entryCount = 0; // 通知ログが空か判定するため
+  // 初期化
+  const isActive = localStorage.getItem("systemActive") === "true";
+  toggle.checked = isActive;
+  updateStatus(isActive);
 
-// 初期化
-(function initSwitch() {
-  const isRunning = localStorage.getItem("autoTrade") === "on";
-  toggle.checked  = isRunning;
-  updateSwitchUI(isRunning);
-})();
+  toggle.addEventListener("change", () => {
+    const active = toggle.checked;
+    localStorage.setItem("systemActive", active);
+    updateStatus(active);
+  });
 
-toggle.addEventListener("change", () => {
-  const active = toggle.checked;
-  localStorage.setItem("autoTrade", active ? "on" : "off");
-  updateSwitchUI(active);
+  function updateStatus(active) {
+    const statusElem = document.getElementById("systemStatus");
+    statusElem.textContent = active ? "稼働中" : "停止中";
+    statusElem.className = active ? "on" : "off";
+  }
+
+  function sendPushNotification(message) {
+    if (window.OneSignal) {
+      OneSignal.Notifications.isPushNotificationsEnabled()
+        .then(function(isEnabled) {
+          if (isEnabled) {
+            OneSignal.sendSelfNotification(
+              "エントリー通知",
+              message,
+              window.location.href,
+              null
+            );
+          } else {
+            console.log("通知が許可されていません");
+          }
+        });
+    }
+  }
+
+  // データ読み込みチェック
+  try {
+    if (typeof tradeLog === "undefined" || !Array.isArray(tradeLog)) throw new Error();
+    csv.textContent = "OK";
+
+    // 成績集計
+    let wins = 0, total = 0, totalPips = 0, totalRR = 0;
+    tradeLog.forEach(row => {
+      total++;
+      totalPips += row.pips;
+      totalRR += row.rr;
+      if (row.result === 1) wins++;
+    });
+
+    document.getElementById("statWinRate").textContent = `${((wins / total) * 100).toFixed(1)}%`;
+    document.getElementById("statPips").textContent = totalPips.toFixed(1);
+    document.getElementById("statRR").textContent = (totalRR / total).toFixed(2);
+
+    // 最終エントリー
+    const last = tradeLog[tradeLog.length - 1];
+    const message = `エントリー発生：${last.date} ${last.result === 1 ? 'L' : 'S'}`;
+    lastEntry.textContent = `${last.date} ${last.result === 1 ? 'L' : 'S'}`;
+    sendPushNotification(message);
+  } catch {
+    csv.textContent = "エラー";
+  }
+
+  // 通知（仮にON固定）
+  notify.textContent = "有効";
 });
 
-function updateSwitchUI(active) {
-  statusText.textContent      = active ? "ON" : "OFF";
-  currentStatus.textContent   = active ? "稼働中" : "停止中";
-  currentStatus.className     = active ? "on" : "off";
-}
-
-/* ─────────────────────────────────────────
-   収支テーブル & サマリー
-──────────────────────────────────────── */
-fetch("trade_log.csv")
-  .then(res => res.text())
-  .then(csv => {
-    const lines = csv.trim().split("\n");
-    const tbody = document.getElementById("logTable");
-
-    let wins = 0, pipsSum = 0, rrSum = 0;
-
-    lines.forEach((line, i) => {
-      if (!line.trim()) return;
-      const cols = line.split(",");
-      if (i === 0) return; // 見出しスキップ
-
-      const tr = document.createElement("tr");
-      cols.forEach(col => {
-        const td = document.createElement("td");
-        td.textContent = col;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-
-      // 集計
-      const winLose = cols[1].trim();
-      const pips    = parseFloat(cols[2]);
-      const rr      = parseFloat(cols[3]);
-      if (winLose === "win") wins++;
-      pipsSum += pips;
-      rrSum   += rr;
-    });
-
-    const trades = lines.length - 1;
-    updateStatsBar(trades, wins, pipsSum, rrSum / (trades || 1));
-  })
-  .catch(err => {
-    document.getElementById("logTable").innerHTML =
-      "<tr><td colspan='4'>データ読み込みエラー</td></tr>";
-    console.error("CSV読み込みエラー:", err);
-  });
-
-function updateStatsBar(trades, wins, pips, avgRR) {
-  document.getElementById("statTrades").textContent  = trades;
-  document.getElementById("statWinRate").textContent =
-    trades ? ((wins / trades) * 100).toFixed(1) + "%" : "0%";
-  document.getElementById("statPips").textContent     = pips.toFixed(1);
-  document.getElementById("statRR").textContent       = avgRR.toFixed(2);
-}
-
-/* ─────────────────────────────────────────
-   エントリー通知ログ & ブラウザ通知
-──────────────────────────────────────── */
-function notifyEntry(side, pair, price) {
-  const now  = new Date().toLocaleString();
-  const log  = document.getElementById("entryLog");
-
-  if (entryCount === 0) log.innerHTML = ""; // 初回だけデフォルト行を消す
-  entryCount++;
-
-  const li   = document.createElement("li");
-  li.textContent = `${now} - ${side} - ${pair} - ${price}`;
-  log.prepend(li);
-
-  lastEntryTime.textContent = now;
-
-  // ブラウザ通知
-  if (Notification.permission === "granted") {
-    new Notification(`${side}エントリー - ${pair}`, {
-      body: `${now} / ${price}`,
-    });
-  }
-}
-
-// Permission要求（初回のみ）
-if ("Notification" in window && Notification.permission === "default") {
-  Notification.requestPermission();
-}
-
-/* 例）エントリー発生時に以下を呼び出す
-notifyEntry("買い", "USDJPY", "158.456");
-*/
-
-/* ─────────────────────────────────────────
-   地合い評価（ダミーロジック / 6軸）
-──────────────────────────────────────── */
-const axes = [
-  "トレンド方向", "ボラティリティ", "流動性",
-  "スプレッド", "イベントリスク", "市場心理"
-];
-const marketEvalUl = document.getElementById("marketEval");
-
-function renderMarketEval(resultArr) {
-  marketEvalUl.innerHTML = "";
-  resultArr.forEach((ok, idx) => {
-    const li = document.createElement("li");
-    li.innerHTML =
-      `${axes[idx]}：<span class="${ok ? "ok" : "ng"}">${ok ? "○" : "×"}</span>`;
-    marketEvalUl.appendChild(li);
-  });
-}
-
-function evaluateMarket() {
-  // ★ ダミー：ランダム○×を生成。実運用ではここにロジックを入れる
-  const result = axes.map(() => Math.random() > 0.3);
-  renderMarketEval(result);
-  return result;
-}
-document.getElementById("btnEvalMarket").addEventListener("click", evaluateMarket);
-// 初回描画
-evaluateMarket();
-
-/* ─────────────────────────────────────────
-   構造整合性チェック （ダミーロジック）
-──────────────────────────────────────── */
-function checkStructure() {
-  // ★ ダミー：50%で整合
-  const ok = Math.random() > 0.5;
-  document.getElementById("structureStatus").textContent =
-    ok ? "整合" : "逆行";
-  document.getElementById("structureStatus").className =
-    ok ? "ok" : "ng";
-  return ok;
-}
-document.getElementById("btnCheckStructure").addEventListener("click", checkStructure);
-
-/* ─────────────────────────────────────────
-   TP/SL & RR 計算
-──────────────────────────────────────── */
-["inpEntry", "inpTP", "inpSL"].forEach(id =>
-  document.getElementById(id).addEventListener("input", calcRR)
-);
-
-function calcRR() {
-  const entry = parseFloat(document.getElementById("inpEntry").value);
-  const tp    = parseFloat(document.getElementById("inpTP").value);
-  const sl    = parseFloat(document.getElementById("inpSL").value);
-
-  if (isNaN(entry) || isNaN(tp) || isNaN(sl) || entry === sl) {
-    document.getElementById("rrValue").textContent = "―";
-    return;
-  }
-  const rr = Math.abs(tp - entry) / Math.abs(entry - sl);
-  document.getElementById("rrValue").textContent = rr.toFixed(2);
-}
-
-/* ─────────────────────────────────────────
-   最終判断  (極簡ロジック例)
-──────────────────────────────────────── */
-function finalDecision() {
-  const evalOK  = [...marketEvalUl.querySelectorAll("span.ok")].length;
-  const structOK = document.getElementById("structureStatus").textContent === "整合";
-  const rrVal   = parseFloat(document.getElementById("rrValue").textContent);
-
-  let decision = "見送り";
-  if (evalOK >= 5 && structOK && rrVal >= 1.5) decision = "撃つ";
-  else if (evalOK <= 2 || !structOK) decision   = "構造否定";
-
-  document.getElementById("finalDecision").textContent = decision;
-  return decision;
-}
-
-// 地合い・構造・RR の各更新後に最終判断を自動更新
-["btnEvalMarket", "btnCheckStructure"].forEach(id =>
-  document.getElementById(id).addEventListener("click", () => {
-    setTimeout(finalDecision, 50);
-  })
-);
-["inpEntry", "inpTP", "inpSL"].forEach(id =>
-  document.getElementById(id).addEventListener("input",
-    () => setTimeout(finalDecision, 50))
-);

@@ -96,3 +96,6 @@ OneSignal.push(function() {
   // 初回通知（テスト）
   sendPushNotification("ページを開きました（OneSignal準備完了）");
 });
+OneSignal.push(function() {
+  OneSignal.showSlidedownPrompt(); // 通知許可を再表示
+});

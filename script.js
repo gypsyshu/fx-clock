@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const minutes = now.getMinutes();
     const nowMinutes = hours * 60 + minutes;
 
-    const start = 10 * 60 + 10; // 10:10
-    const end = 20 * 60 + 59;  // 20:59
+    const start = 9 * 60 + 0;  // 9:00
+    const end = 23 * 60 + 30;  // 23:30
 
     return nowMinutes >= start && nowMinutes <= end;
   }
@@ -30,8 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateStatus(active) {
     const statusElem = document.getElementById("systemStatus");
-    statusElem.textContent = active ? "稼働中" : "停止中";
-    statusElem.className = active ? "on" : "off";
+    if (!isWithinTradingHours()) {
+      statusElem.textContent = "停止中（時間外）";
+      statusElem.className = "off";
+    } else {
+      statusElem.textContent = active ? "稼働中" : "停止中";
+      statusElem.className = active ? "on" : "off";
+    }
   }
 
   function sendPushNotification(message) {
@@ -69,8 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("statRR").textContent = (totalRR / total).toFixed(2);
 
     const last = tradeLog[tradeLog.length - 1];
-    const message = `エントリー発生：${last.date} ${last.result === 1 ? 'L' : 'S'}`;
-    lastEntry.textContent = `${last.date} ${last.result === 1 ? 'L' : 'S'}`;
+    const message = `エントリー発生：${last.date} ${last.result === 1 ? 'L' : 'S'} ${last.time || '--:--'}`;
+    lastEntry.textContent = `${last.date} ${last.result === 1 ? 'L' : 'S'} ${last.time || '--:--'}`;
     sendPushNotification(message);
   } catch {
     csv.textContent = "エラー";

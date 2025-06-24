@@ -1,4 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // スイッチと証拠金
+  const toggle = document.getElementById("toggleSystem");
+  const status = document.getElementById("systemStatus");
+  const balance = document.getElementById("balance");
+
+  const isActive = localStorage.getItem("systemActive") === "true";
+  toggle.checked = isActive;
+  status.textContent = isActive ? "稼働中" : "停止中";
+  status.className = isActive ? "on" : "off";
+
+  toggle.addEventListener("change", () => {
+    const active = toggle.checked;
+    localStorage.setItem("systemActive", active);
+    status.textContent = active ? "稼働中" : "停止中";
+    status.className = active ? "on" : "off";
+  });
+
+  // 仮：証拠金表示（今後API連携対応可能）
+  balance.textContent = "¥123,456";
+
+  // ログ表示
   if (typeof tradeLog === "undefined") {
     console.error("data.jsが読み込まれていません");
     return;
@@ -31,3 +52,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("statPips").textContent = totalPips.toFixed(1);
   document.getElementById("statRR").textContent = avgRR;
 });
+

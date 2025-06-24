@@ -8,6 +8,14 @@
 <body>
   <h1>FX自動売買コントロールパネル</h1>
 
+  <section id="info">
+    <p>証拠金: <span id="balance">¥100,000</span></p>
+    <label>
+      <input type="checkbox" id="toggleSystem" />
+      <span id="systemStatus">停止中</span>
+    </label>
+  </section>
+
   <section>
     <h2>収支サマリー</h2>
     <p>取引数: <span id="statTrades">0</span></p>
@@ -26,7 +34,6 @@
     </table>
   </section>
 
-  <!-- script.js より先に data.js を読み込む -->
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>

@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const csv = document.getElementById("csvStatus");
   const lastEntry = document.getElementById("lastEntry");
 
-  // 初期化
   const isActive = localStorage.getItem("systemActive") === "true";
   toggle.checked = isActive;
   updateStatus(isActive);
@@ -40,12 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // データ読み込みチェック
   try {
     if (typeof tradeLog === "undefined" || !Array.isArray(tradeLog)) throw new Error();
     csv.textContent = "OK";
 
-    // 成績集計
     let wins = 0, total = 0, totalPips = 0, totalRR = 0;
     tradeLog.forEach(row => {
       total++;
@@ -58,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("statPips").textContent = totalPips.toFixed(1);
     document.getElementById("statRR").textContent = (totalRR / total).toFixed(2);
 
-    // 最終エントリー
     const last = tradeLog[tradeLog.length - 1];
     const message = `エントリー発生：${last.date} ${last.result === 1 ? 'L' : 'S'}`;
     lastEntry.textContent = `${last.date} ${last.result === 1 ? 'L' : 'S'}`;
@@ -67,7 +63,5 @@ document.addEventListener("DOMContentLoaded", () => {
     csv.textContent = "エラー";
   }
 
-  // 通知（仮にON固定）
   notify.textContent = "有効";
 });
-

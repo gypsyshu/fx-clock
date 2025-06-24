@@ -5,14 +5,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const csv = document.getElementById("csvStatus");
   const lastEntry = document.getElementById("lastEntry");
 
-  const isActive = localStorage.getItem("systemActive") === "true";
-  toggle.checked = isActive;
+  function isWithinTradingHours() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const nowMinutes = hours * 60 + minutes;
+
+    const start = 10 * 60 + 10; // 10:10
+    const end = 20 * 60 + 59;  // 20:59
+
+    return nowMinutes >= start && nowMinutes <= end;
+  }
+
+  const isUserActive = localStorage.getItem("systemActive") === "true";
+  const isActive = isUserActive && isWithinTradingHours();
+  toggle.checked = isUserActive;
   updateStatus(isActive);
 
   toggle.addEventListener("change", () => {
     const active = toggle.checked;
     localStorage.setItem("systemActive", active);
-    updateStatus(active);
+    updateStatus(active && isWithinTradingHours());
   });
 
   function updateStatus(active) {

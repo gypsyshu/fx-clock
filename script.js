@@ -83,4 +83,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   notify.textContent = "有効";
 });
-sendPushNotification("ページを開きました！（テスト）");
+

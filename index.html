@@ -4,76 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FX Clock - 自動売買パネル</title>
-
-  <!-- PWA設定 -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <meta name="apple-mobile-web-app-title" content="FX Clock" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.init({
-        appId: "478eae6e-2a31-446e-8b47-b596293afa68", // ← ここに正しいApp IDを記載
-        safari_web_id: "web.onesignal.YOUR_SAFARI_WEB_ID", // ← Safari用Web IDに置き換えてください
-        notifyButton: {
-          enable: true
-        },
-        allowLocalhostAsSecureOrigin: true
-      });
-
-      OneSignal.showSlidedownPrompt().catch(e => {
-        console.warn("通知プロンプトエラー:", e);
-      });
-    });
-  </script>
-
-  <style>
-    body {
-      background-color: #000;
-      color: #0f0;
-      font-family: monospace;
-      margin: 0;
-      padding: 1em;
-      text-align: center;
-    }
-    .panel {
-      border: 2px solid #0f0;
-      margin: 1em auto;
-      padding: 1em;
-      border-radius: 10px;
-      max-width: 400px;
-      box-shadow: 0 0 10px #0f0;
-    }
-    .danger {
-      color: red;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <h1>FX 自動売買パネル</h1>
 
   <div class="panel">
-    <p><span class="danger">● 停止中</span></p>
-    <p>最終エントリー: 2025-06-24 S 22:10</p>
+    <p class="status" id="system-status">🔴 停止中</p>
+    <p id="last-entry">最終エントリー：--</p>
   </div>
 
-  <div class="panel">
-    <p>勝率: 50.0%</p>
-    <p>合計pips: 15.0</p>
-    <p>平均RR: 1.25</p>
+  <div class="stats">
+    <p id="win-rate">勝率: --</p>
+    <p id="total-pips">合計pips: --</p>
+    <p id="avg-rr">平均RR: --</p>
   </div>
 
-  <div class="panel">
-    <p>通知: 有効</p>
-    <p>CSV: エラー</p>
+  <div class="notifications">
+    <p>通知: <span id="notify-status">無効</span></p>
+    <p id="csv-status">CSV: 未読み込み</p>
   </div>
+
+  <!-- ✅ 先に data.js を読み込む -->
+  <script src="data.js"></script>
+  <!-- ✅ その後に script.js -->
+  <script src="script.js"></script>
 </body>
 </html>
